@@ -1,0 +1,64 @@
+
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Greve Autogenbrug</title>
+<style>
+body{font-family:Arial;background:#f3f6f8;margin:0;color:#182b36}
+header{background:#173c39;color:white;padding:22px;text-align:center}
+main{max-width:600px;margin:auto;padding:16px}
+section{background:white;border-radius:14px;padding:18px;margin-bottom:15px;box-shadow:0 2px 8px #0001}
+input,select,button{box-sizing:border-box;width:100%;padding:13px;margin:7px 0;border:1px solid #ccd5d8;border-radius:9px;font-size:16px}
+button{background:#17745b;color:white;border:0;font-weight:bold}
+label{font-weight:bold;font-size:14px}
+.item{padding:12px;border-bottom:1px solid #eee}
+small{color:#667}
+.delete{background:#b83c3c}
+</style>
+</head>
+<body>
+<header><h2>Greve Autogenbrug</h2><div>Araç Kayıt Sistemi</div></header>
+<main>
+<section>
+<h3>Yeni Araç</h3>
+<label>Plaka</label><input id="plaka" placeholder="Plaka">
+<label>Şase numarası (isteğe bağlı)</label><input id="sase" placeholder="Şase">
+<label>Firma</label>
+<select id="firma">
+<option>MCK Auto ApS</option>
+<option>Ara Biler</option>
+<option>Metin Biler</option>
+</select>
+<label>Araç markası / modeli</label><input id="model" placeholder="Örn. Toyota Yaris">
+<label>Not</label><input id="not" placeholder="İsteğe bağlı">
+<button onclick="ekle()">Aracı Kaydet</button>
+</section>
+<section>
+<h3>Araçlar (<span id="sayi">0</span>)</h3>
+<input id="ara" placeholder="Araç ara..." oninput="listele()">
+<div id="liste"></div>
+</section>
+</main>
+<script>
+let araclar=JSON.parse(localStorage.getItem("araclar")||"[]");
+function ekle(){
+let a={id:Date.now(),plaka:document.getElementById("plaka").value.trim(),sase:document.getElementById("sase").value.trim(),firma:document.getElementById("firma").value,model:document.getElementById("model").value.trim(),not:document.getElementById("not").value.trim(),tarih:new Date().toLocaleDateString("tr-TR")};
+if(!a.plaka&&!a.sase&&!a.model){alert("En az bir araç bilgisi yaz.");return}
+araclar.unshift(a);kaydet();
+["plaka","sase","model","not"].forEach(x=>document.getElementById(x).value="");
+}
+function kaydet(){localStorage.setItem("araclar",JSON.stringify(araclar));listele()}
+function sil(id){if(confirm("Araç silinsin mi?")){araclar=araclar.filter(a=>a.id!==id);kaydet()}}
+function temiz(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function listele(){
+let q=document.getElementById("ara").value.toLowerCase();
+document.getElementById("sayi").textContent=araclar.length;
+document.getElementById("liste").innerHTML=araclar.filter(a=>Object.values(a).join(" ").toLowerCase().includes(q)).map(a=>`<div class="item"><b>${temiz(a.plaka||a.model||"Plakasız araç")}</b><div>${temiz(a.firma)}</div><small>${temiz(a.model)} ${temiz(a.sase)} | ${a.tarih}</small><div>${temiz(a.not)}</div><button class="delete" onclick="sil(${a.id})">Sil</button></div>`).join("")||"Henüz araç yok.";
+}
+listele();
+</script>
+</body>
+</html>
+    
